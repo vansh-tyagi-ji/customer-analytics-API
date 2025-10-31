@@ -1,0 +1,230 @@
+# configs/params.yaml
+
+data_ingestion:
+  source_customer_filename: customer_features_advanced.csv
+  source_order_filename: order_master_final_2.csv
+
+training:
+  test_size: 0.2
+  random_state: 42
+
+tasks:
+  churn_prediction:
+    source_data: customer_file
+    target:
+      name: churn
+      creation_logic: "days_since_last_order > 180"
+    
+    numerical_features:
+      # - days_since_last_order
+      - total_orders
+      - total_items
+      - total_spent
+      - total_freight
+      - avg_review_score
+      
+    categorical_features:
+      - customer_state
+      - review_speed_category
+      - segment_id
+      
+    split_required: True
+    train_data_filename: churn_train.csv
+    test_data_filename: churn_test.csv
+    
+    model_params_grid:
+      # RandomForestClassifier:
+      #   n_estimators: [100]
+      #   max_depth: [ 20]   
+      #   min_samples_split: [10]
+      #   class_weight: [balanced]
+      #   max_features: [sqrt]
+      #   min_samples_leaf: [1]
+      #   # n_jobs: [-1]
+
+      XGBClassifier:
+        n_estimators: 500
+        learning_rate: 0.1
+        max_depth: 7
+        subsample: 0.8
+        colsample_bytree: 0.9
+        gamma: 0.5
+        reg_lambda: 1.5
+        scale_pos_weight: 2.5
+        reg_alpha: 0.5
+        random_state: 42
+        n_jobs: -1
+        use_label_encoder: False
+        eval_metric: 'logloss'
+
+    optimal_threshold: 0.7
+        # random_state: [42]
+        # tree_method: ['gpu_hist']
+        # max_bin: [256,512,1024]
+        # n_jobs: [-1]
+
+
+  customer_segmentation:
+    source_data: customer_file
+    target: null # Unsupervised learning
+    
+    numerical_features:
+      - days_since_last_order 
+      - total_orders          
+      - total_spent
+      - avg_review_score
+      - customer_tenure_days
+      
+    categorical_features: []
+    
+    split_required: False
+    output_filename: segmentation_data.csv
+    
+    model_params_grid:
+      KMeans:
+        n_clusters: 4
+        init: k-means++
+        n_init: 12
+        random_state: 42
+        max_iter: 300
+
+  clv_prediction:
+    source_data: customer_file
+    target:
+      name: total_spent 
+      
+    numerical_features:
+      - total_items
+      - total_freight
+      - avg_price
+      - avg_review_score
+      - customer_tenure_days
+      - avg_items_per_order
+      - purchase_month
+      - purchase_week_of_year
+      - tenure_X_spending      
+      - freight_per_order 
+      
+    categorical_features:
+      - customer_state
+      - segment_id
+      
+    split_required: True
+    train_data_filename: clv_train.csv
+    test_data_filename: clv_test.csv
+    
+    model_params_grid:
+     XGBRegressor:
+      n_estimators: 200
+      learning_rate: 0.1
+      max_depth: 5
+      subsample: 0.7
+      colsample_bytree: 0.9
+      reg_alpha: 0.5
+      reg_lambda: 1
+      gamma: 3
+      min_child_weight: 1
+      random_state: 42
+
+    #  RandomForestRegressor:
+    #   n_estimators: [200, 300, 500]
+    #   max_depth: [10, 15, 20, None]
+    #   min_samples_split: [2, 5, 10]
+    #   min_samples_leaf: [1, 2, 4]
+    #   max_features: ["sqrt", "log2"]
+    #   bootstrap: [True, False]
+
+  # conversion_prediction:
+  #   source_data: order_file
+  #   target:
+  #     name: converted
+  #     creation_logic: "order_status == 'delivered'"
+      
+  #   numerical_features:
+  #     - price
+  #     - freight_value
+  #     - purchase_to_approval
+  #     - approval_to_carrier
+  #     - estimated_vs_actual
+  #     - product_name_length
+  #     - product_description_lenght
+  #     - product_photos_qty
+  #     - product_weight_g
+  #     - product_volume_cm3
+  #     - price_X_sentiment     # <-- ADD
+  #     - price_X_photos_qty
+      
+  #   categorical_features:
+  #     - payment_type
+  #     - product_category_name
+  #     - seller_state
+  #     - region
+  #     - review_sentiment      
+  #   text_features: [] # Our NLP feature!
+      
+  #   split_required: True
+  #   train_data_filename: conversion_train.csv
+  #   test_data_filename: conversion_test.csv
+    
+  #   model_params_grid:
+  #     # LogisticRegression:
+  #     #   - solver: [liblinear]
+  #     #     penalty: [l1, l2]
+  #     #     C: [0.1, 1.0, 10]
+  #     #     class_weight: [balanced]
+  #     #   - solver: [saga]
+  #     #     penalty: [elasticnet, l2]
+  #     #     C: [0.1, 1.0, 10]
+  #     #     l1_ratio: [0.5] # For elasticnet
+  #     #     class_weight: [balanced]
+
+  #     # RandomForestClassifier:
+  #     #   n_estimators: [100, 200, 300 ,500]
+  #     #   max_depth: [10, 15, 12, 20]
+  #     #   min_samples_split: [2, 5, 10, 15]
+  #     #   class_weight: [balanced]
+  #     #   n_jobs: [-1]
+
+  #     XGBClassifier:
+  #       n_estimators: 600
+  #       learning_rate: 0.2  
+  #       max_depth: 5
+  #       subsample: 0.8
+  #       colsample_bytree: 0.7
+  #       gamma: 1
+  #       # booster: [gbtree, gblinear]
+  #       n_jobs: -1
+  #       reg_lambda: 2
+  #       reg_alpha: 2
+  #       n_jobs: -1
+
+  # recommendation_system:
+  #   source_data: order_file
+  #   # Define the columns for the user-item-rating structure
+  #   user_col: customer_id
+  #   item_col: product_id
+  #   rating_col: review_score
+    
+  #   # Parameters for the surprise library Reader object
+  #   rating_scale: [1, 5]
+
+  #   model_params_grid:
+  #     # SVD:
+  #     #   n_factors: [50, 100, 150]
+  #     #   n_epochs: [20, 30, 40]
+  #     #   lr_all: [0.002, 0.005, 0.01]
+  #     #   reg_all: [0.02, 0.05, 0.1]
+  #     # NMF:
+  #     #   n_components: [15, 20, 30]  # Number of hidden factors (user/item types)
+  #     #   solver: ['cd']             # Efficient solver for NMF
+  #     #   beta_loss: ['frobenius']   # Standard loss function for NMF
+  #     #   l1_ratio: [0, 0.5, 1.0]    # Mix of L1/L2 regularization (like ElasticNet)
+  #     #   alpha_W: [0.01, 0.1]       # Regularization strength for user factors
+  #     #   alpha_H: [0.01, 0.1]       # Regularization strength for item factors
+  #     #   max_iter: [300]            # Maximum iterations for convergence
+  #     #   random_state: [42]
+  #     TruncatedSVD:
+  #       n_components: [50, 100, 150] # Number of latent factors
+  #       algorithm: ['randomized']   # Efficient algorithm for SVD
+  #       n_iter: [5, 10]             # Number of iterations
+  #       random_state: [42]

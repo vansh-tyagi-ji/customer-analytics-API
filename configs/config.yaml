@@ -1,0 +1,29 @@
+artifacts_root: artifacts
+
+data_preperation:
+  root_dir: artifacts/data_preperation
+  scaler_path: artifacts/models/scaler.pkl
+
+data_ingestion:
+  root_dir: artifacts/data_ingestion
+
+model_trainer:
+  trained_models_dir: artifacts/models
+  root_dir: artifacts/model_trainer
+  model_path: artifacts/models/model.pkl
+
+data_preprocessing:
+  root_dir: artifacts/data_preprocessing
+  train_processed_path: artifacts/data_preprocessing/train_processed.csv
+  test_processed_path: artifacts/data_preprocessing/test_processed.csv
+  scaler_path: artifacts/models/scaler.pkl  
+
+model:
+  save_model_path: models/baseline_model.h5
+  metrics_path: models/metrics.json
+
+logging:
+  log_dir: logs/
+  level: INFO
+  log_filename: "running_logs.log"
+  format: "[%(asctime)s] %(levelname)s - %(module)s - %(message)s"
