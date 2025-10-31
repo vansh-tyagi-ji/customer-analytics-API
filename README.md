@@ -22,7 +22,7 @@ For the core models, I didn't just pick one algorithm. I ran a "bake-off" by tun
 * **Final CLV Model:** XGBoost
 * **Final Segmentation Model:** K-Means
 
-### The Pivot: Why We Dropped 2 Models
+### The Pivot: Why I Dropped 2 Models
 This is where the project felt most like the real world. After successfully building 3 models, I had to drop Dynamic Pricing and Recommendation.
 
 * **Dynamic Pricing Failure:** The `optimize_price` script consistently showed a linear relationship (always suggesting the highest price). This wasn't a model failure; it was a **data failure**. The dataset lacked the necessary price variation (i.e., the same product wasn't sold at different prices) for the model to learn price elasticity.
